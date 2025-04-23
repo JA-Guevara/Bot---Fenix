@@ -1,0 +1,10 @@
+{
+  "login": [
+    { "action": "goto", "value": "$url" },
+    { "action": "fill", "target": "step_1.user_input", "value": "$ruc" },
+    { "action": "fill", "target": "step_1.password_input", "value": "$password" },
+    { "action": "click", "target": "step_1.login_button" },
+    { "action": "click", "target": "step_1.fenix_radio_button" },
+    { "action": "click", "target": "step_1.login_button" }
+  ]
+}

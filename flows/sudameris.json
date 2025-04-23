@@ -1,0 +1,10 @@
+{
+    "login": [
+      { "action": "goto", "value": "$url" },
+      { "action": "click", "target": "step_1.open_login" },
+      { "action": "fill", "target": "step_1.user_input", "value": "$user" },
+      { "action": "fill", "target": "step_1.password_input", "value": "$password" },
+      { "action": "click", "target": "step_1.login_button" }
+    ]
+  }
+  

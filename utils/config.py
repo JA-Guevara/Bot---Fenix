@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv
+import json
+
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -22,6 +24,11 @@ def get_credentials(bank_name: str):
     }
 
 
+def load_flow(bank_name):
+    with open(f"flows/{bank_name}.json", "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
 def load_selectors():
 
     return {
@@ -40,22 +47,23 @@ def load_selectors():
 
         "basa": {
             "step_1": {
-                "user_input": "#username",
-                "password_input": "#password",
-                "login_button": "button[type='submit']",
+                "ruc_input": '#solid-justified-tab1 > form > div:nth-child(1) > div > div.col-md-7 > input',
+                "user_input": '#solid-justified-tab1 > form > div:nth-child(2) > div > div.col-md-7 > input',
+                "login_button": 'button[type="submit"].btn.btn-primary',
+                "password_virtual_selector": "[data-valor]"
             }
         },
 
         "sudameris": {
             "step_1": {
-                "open_login": "a[href*='login']"
+                "open_login" : "a[href*='login']",
+                "user_input": "#userValue",
+                "password_input": "#pass-input",
+                "login_button": 'input[type="submit"][value="INGRESAR"]'
             },
             "step_2": {
-                "user_input": "input[name='usuario']",
-                "password_input": "input[name='clave']"
             },
             "step_3": {
-                "login_button": "button[type='submit']"
             }
         },
         
@@ -72,16 +80,14 @@ def load_selectors():
             }
         },
 
-        "basa": {
-            "step_1": {
-                "user_input": "#username",
-                "password_input": "#password",
-                "login_button": "button[type='submit']",
-            }
-        },
         "atlas": {
-            "user_input": "#usuario",
-            "password_input": "#password",
-            "login_button": "#ingresar",
+            "step_1": {
+                "user_input": "input#document",
+                "password_input": "input#password",
+                "login_button": 'button[type="submit"]:has-text("INGRESAR")',
+                "daniel_radio_button": 'role=radio[name="DANIEL BERNARDO MEZA GONZALEZ"]',
+                "fenix_radio_button": 'role=radio[name="FENIX S.A. DE SEGUROS Y REASEGUROS"]'
+
+            }
         }
     }
