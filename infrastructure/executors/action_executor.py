@@ -37,7 +37,24 @@ class ActionExecutor:
             value = self.resolve_variable(step.get("value"))
             self.logger.info(f"📝 Llenando {selector} con '{value}'")
             await self.page.fill(selector, value)
+            
+        elif action == "type":
+            target = step.get("target")
+            value = self.resolve_variable(step.get("value"))
 
+            if not target:
+                self.logger.error("❌ 'target' es requerido para la acción 'type'")
+                raise Exception("'target' es requerido para 'type'")
+
+            selector = self.get_selector(target)
+            if not selector:
+                self.logger.error(f"❌ Selector no encontrado para target: {target}")
+                raise Exception(f"Selector no encontrado: {target}")
+
+            await self.page.click(selector)
+            await self.page.fill(selector, "")  # Limpia el campo antes
+            await self.page.type(selector, value, delay=100)
+            self.logger.info(f"⌨️ Escribiendo (con type) en {selector} el valor: {value}")
         elif action == "click":
             selector = self.get_selector(step.get("target"))
             self.logger.info(f"🖱️ Click en {selector}")
@@ -52,6 +69,19 @@ class ActionExecutor:
             from application.actions.basa_actions import BasaActions 
             executor = BasaActions(self.credentials, self.selectors, flow={})
             await executor.ingresar_password_virtual(self.page, self.credentials["password"])
+        elif action == "wait_time":
+            tiempo = step.get("value", 1000)  # por defecto 1 segundo si no hay valor
+            self.logger.info(f"⏳ Esperando {tiempo}ms")
+            await self.page.wait_for_timeout(tiempo)
+        elif action == "type_virtual_pin":
+            from application.actions.itau_actions import ItauActions
+            executor = ItauActions(self.credentials, self.selectors, flow={})
+            await executor.ingresar_pin_virtual(self.page, self.credentials["password"])
+
+        elif action == "keyboard_press":
+            key = step.get("value")
+            await self.page.keyboard.press(key)
+            self.logger.info(f"⌨️ Presionada tecla: {key}")
 
 
         else:

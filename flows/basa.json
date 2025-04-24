@@ -1,12 +1,17 @@
 {
-    "login": [
-      { "action": "goto", "value": "$url" },
-      { "action": "fill", "target": "step_1.ruc_input", "value": "$ruc" },
-      { "action": "fill", "target": "step_1.user_input", "value": "$user" },
-      { "action": "click", "target": "step_1.login_button" },
-      { "action": "wait_for", "target": "step_1.password_virtual_selector" },
-      { "action": "type_virtual_password" },
-      { "action": "click", "target": "step_1.login_button" }
-    ]
-  }
-  
+  "login": [
+    { "action": "goto", "value": "$url" },
+    { "action": "fill", "target": "step_1.ruc_input", "value": "$ruc" },
+    { "action": "fill", "target": "step_1.user_input", "value": "$user" },
+    { "action": "click", "target": "step_1.login_button" },
+    { "action": "wait_time", "value": 1000 }, 
+    { "action": "wait_for", "target": "step_1.password_virtual_selector" },
+    { "action": "type_virtual_password" },
+    { "action": "click", "target": "step_1.login_button" }
+  ],
+
+  "logout": [
+    { "action": "click", "target": "step_3.menu_button" },
+    { "action": "click", "target": "step_3.logout_button" }
+  ]
+}
