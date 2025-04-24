@@ -34,14 +34,19 @@ def load_selectors():
     return {
         "continental": {
             "step_1": {
-                "start_button": "#inicioSesionBtn",
+                "online_banking": '#navbarsDefault > ul > li:nth-child(6) > button',
+                "companies_checkbox": 'input[name="Empresas"]',
+                "ruc_input": '#docIdentidad',
+                "user_input": '#docIdentidad2',
+                "password_input": "#clave",
+                "login_button": '#ingresar_btn',
             },
             "step_2": {
-                "user_input": "#usuario",
-                "password_input": "#clave",
             },
             "step_3": {
-                "submit_button": "#botonEntrar",
+                "menu_button": "a#menu-user:has(span.fa-cog)",
+                "logout_button": "a:has(.fa-sign-out)"
+
             }
         },
 
@@ -51,6 +56,12 @@ def load_selectors():
                 "user_input": '#solid-justified-tab1 > form > div:nth-child(2) > div > div.col-md-7 > input',
                 "login_button": 'button[type="submit"].btn.btn-primary',
                 "password_virtual_selector": "[data-valor]"
+            },
+            "step_2": {
+            },
+            "step_3": {
+                "menu_button": 'a.dropdown-toggle[data-toggle="dropdown"]',
+                "logout_button": 'a.bttn-logout[href="/be/logout"]'
             }
         },
 
@@ -69,17 +80,21 @@ def load_selectors():
         
         "itau": {
             "step_1": {
-                "start_button": "#inicioSesionBtn",
+                "segment_selector": "#segmento",
+                "ruc_input": "#ruc",
+                "user_input": "#cuenta_empresa",
+                "login_button": "#vprocesar",
+                "password_virtual_selector": "#teclado_borrar",
+                "access_button": "#rwb_login_Siguiente"
+
             },
             "step_2": {
-                "user_input": "#usuario",
-                "password_input": "#clave",
             },
             "step_3": {
-                "submit_button": "#botonEntrar",
+                "logout_button": "#rwb_header_user_box_salir"
             }
         },
-
+        
         "atlas": {
             "step_1": {
                 "user_input": "input#document",
@@ -87,7 +102,12 @@ def load_selectors():
                 "login_button": 'button[type="submit"]:has-text("INGRESAR")',
                 "daniel_radio_button": 'role=radio[name="DANIEL BERNARDO MEZA GONZALEZ"]',
                 "fenix_radio_button": 'role=radio[name="FENIX S.A. DE SEGUROS Y REASEGUROS"]'
-
+            },
+            "step_2": {
+            },
+            "step_3": {
+                "logout_button": "div.flex.justify-center.items-center.gap-2 span.cursor-pointer",
+                "confirm_logout_button": "button:has-text('Aceptar')",
             }
         }
     }

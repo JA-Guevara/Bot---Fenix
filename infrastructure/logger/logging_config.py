@@ -36,4 +36,3 @@ def setup_logging():
     # Añadir el handler al logger principal
     logger.addHandler(handler)
 
-"hola"

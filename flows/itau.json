@@ -1,0 +1,20 @@
+{
+  "login": [
+    { "action": "goto", "value": "$url" },
+    { "action": "click", "target": "step_1.segment_selector" },
+    { "action": "keyboard_press", "value": "ArrowDown" },
+    { "action": "keyboard_press", "value": "Enter" },
+
+    { "action": "type", "target": "step_1.ruc_input", "value": "$ruc" },
+    { "action": "type", "target": "step_1.user_input", "value": "$user" },
+    { "action": "click", "target": "step_1.login_button" },
+
+    { "action": "wait_for", "target": "step_1.password_virtual_selector" },
+    { "action": "type_virtual_pin" },
+    { "action": "click", "target": "step_1.access_button" }
+  ],
+
+  "logout": [
+    { "action": "click", "target": "step_3.logout_button" }
+  ]
+}

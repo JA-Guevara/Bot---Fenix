@@ -6,5 +6,10 @@
     { "action": "click", "target": "step_1.login_button" },
     { "action": "click", "target": "step_1.fenix_radio_button" },
     { "action": "click", "target": "step_1.login_button" }
+  ],
+
+  "logout": [
+    { "action": "click", "target": "step_3.logout_button" },
+    { "action": "click", "target": "step_3.confirm_logout_button" }
   ]
 }
