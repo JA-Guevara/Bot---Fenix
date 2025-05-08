@@ -10,8 +10,28 @@
     { "action": "click", "target": "step_1.login_button" }
   ],
 
+  "pre_download": [
+    { "action": "click", "target": "step_2.button_products" }
+  ],
+
+  "download": [
+    { "action": "click", "target": "step_3.extract_button" },
+    { "action": "click", "target": "step_3.select_mes" },
+    { "action": "fill", "target": "step_3.input_field", "value": "$mes" },
+    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "click", "target": "step_3.select_inicio" },
+    { "action": "fill", "target": "step_3.input_field", "value": "$dia_inicio" },
+    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "click", "target": "step_3.select_fin" },
+    { "action": "fill", "target": "step_3.input_field", "value": "$dia_fin" },
+    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
+    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "click", "target": "step_2.button_products" }
+  ],
+
   "logout": [
-    { "action": "click", "target": "step_3.menu_button" },
-    { "action": "click", "target": "step_3.logout_button" }
+    { "action": "click", "target": "step_4.menu_button" },
+    { "action": "click", "target": "step_4.logout_button" }
   ]
 }

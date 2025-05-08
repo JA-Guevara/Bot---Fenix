@@ -19,7 +19,10 @@ class BrowserManager:
         """
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.launch(headless=self.headless)
-        self.context = await self.browser.new_context()  # siempre limpio
+        self.context = await self.browser.new_context(
+            accept_downloads=True
+        )
+
         return self.context
 
     async def get_new_page(self):

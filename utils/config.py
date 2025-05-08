@@ -7,21 +7,28 @@ import json
 load_dotenv()
 
 # Tiempo de espera general
-TIMEOUT = int(os.getenv("TIMEOUT", 120))
 
+PERIODO_DESCARGA = os.getenv("PERIODO_DESCARGA", "mensual")  # por defecto mensual
+QUINCENA = os.getenv("QUINCENA") 
+RUTA_EXCEL = os.getenv("RUTA_EXCEL")
+BASE_DIR = os.getenv("BASE_DIR")
 
-def get_environment():
-    return os.getenv("ENVIRONMENT", "development")
 
 def get_credentials(bank_name: str):
-    
     upper = bank_name.upper()
-    return {
+    
+    credentials = {
         "url": os.getenv(f"{upper}_URL"),
         "ruc": os.getenv(f"{upper}_RUC"),
         "user": os.getenv(f"{upper}_USER"),
         "password": os.getenv(f"{upper}_PASS"),
     }
+
+    if upper == "GNB":
+        credentials["user2"] = os.getenv(f"{upper}_USER2")
+
+    return credentials
+
 
 
 def load_flow(bank_name):
@@ -58,10 +65,22 @@ def load_selectors():
                 "password_virtual_selector": "[data-valor]"
             },
             "step_2": {
+                "button_products": "a:has-text('Productos')",
+                
             },
+            
             "step_3": {
-                "menu_button": 'a.dropdown-toggle[data-toggle="dropdown"]',
-                "logout_button": 'a.bttn-logout[href="/be/logout"]'
+                "list_selector": ".selector ul li a.tablinks",
+                "extract_button": "#extracto-form > button",
+                "select_mes"   : "#form-content > div.row > div.form-group.col-md-2 > span > span.selection > span",
+                "select_inicio": "#extracto-pdf > div:nth-child(5) > span > span.selection > span",
+                "select_fin": "#extracto-pdf > div:nth-child(7) > span > span.selection > span",
+                "input_field": "body > span > span > span.select2-search.select2-search--dropdown > input",
+                "excel_export_button": "#extracto-pdf > div.col-md-7 > div > div:nth-child(2) > button",
+            },
+            "step_4": {
+                "menu_button": '#navbar-mobile > ul > li > a',
+                "logout_button": '#navbar-mobile > ul > li > ul > li:nth-child(4) > a'
             }
         },
 
@@ -109,5 +128,21 @@ def load_selectors():
                 "logout_button": "div.flex.justify-center.items-center.gap-2 span.cursor-pointer",
                 "confirm_logout_button": "button:has-text('Aceptar')",
             }
+        },
+        "gnb": {
+            "step_1": {
+                "client_access_button": "a.sign-in.hidden-lg",
+                "empresa_radio": "label[for='rCompany']",
+                "ruc_input": "#ruc",
+                "user_input": "#documentNumber",    
+                "user2_input": "#access-username",  
+                "password_input": "#access-pin",
+                "login_button": "#btnLogin"     
+            },
+            "step_2": {},
+            "step_3": {
+                "logout_button": "#rwb_header_user_box_salir"         
+            }
         }
+
     }
