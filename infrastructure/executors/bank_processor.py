@@ -49,8 +49,8 @@ class BankProcessor:
 
             contexto = ContextoEjecucion(
                 cuentas=self.cuentas,
-                fecha_inicio=self.fecha_inicio,
-                fecha_fin=self.fecha_fin,
+                fecha_inicio=self.fecha_inicio.strftime("%Y-%m-%d"),
+                fecha_fin=self.fecha_fin.strftime("%Y-%m-%d"),
                 mes=self.mes,
                 banco=self.nombre_banco,
                 base_dir=self.base_dir,

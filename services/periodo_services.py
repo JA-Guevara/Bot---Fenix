@@ -11,7 +11,6 @@ def generar_periodo():
     periodo = os.getenv("PERIODO_DESCARGA", "MENSUAL").upper()
     quincena = os.getenv("QUINCENA", "1")
 
-    # 🟡 Ajustamos al primer día del mes anterior
     primer_dia_mes_actual = hoy.replace(day=1)
     ultimo_dia_mes_anterior = primer_dia_mes_actual - timedelta(days=1)
     fecha_base = ultimo_dia_mes_anterior.replace(day=1)
@@ -29,10 +28,8 @@ def generar_periodo():
         fecha_inicio = fecha_base
         siguiente_mes = fecha_base.replace(day=28) + timedelta(days=4)
         fecha_fin = siguiente_mes - timedelta(days=siguiente_mes.day)
-
-    # Aseguramos que fecha_fin sea el último día del mes anterior
-    fecha_fin = fecha_fin.replace(day=ultimo_dia_mes_anterior.day)
+        # Solo en mensual ajustamos al último día real
+        fecha_fin = fecha_fin.replace(day=ultimo_dia_mes_anterior.day)
 
     nombre_mes = f"{MESES_ES[fecha_fin.month - 1]} {fecha_fin.year}"
-
     return fecha_inicio, fecha_fin, nombre_mes

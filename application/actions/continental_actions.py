@@ -20,13 +20,18 @@ class ContinentalActions(LoginStrategy):
         await executor.run_flow(self.flow["pre_download"])
 
     async def descargar_reportes(self, page):
-        
+        self.logger.info("📥 Iniciando descarga de reportes para Banco Continental...")
         executor = ActionExecutor(page, self.selectors, self.credentials)
         executor.set_contexto(**self.contexto.to_dict())
 
+        self.logger.debug(f"📋 Pasos de descarga: {self.flow['download']}")
+        self.logger.debug(f"🏦 Banco: {self.contexto.banco}")
+
         await executor.descargar_reportes(
-            pasos_descarga=self.flow["download"]
+            pasos_descarga=self.flow["download"],
+            banco=self.contexto.banco
         )
+        self.logger.info("✅ Descarga de reportes completada para Banco Continental.")
 
     async def logout(self, page):
         executor = ActionExecutor(page, self.selectors, self.credentials)

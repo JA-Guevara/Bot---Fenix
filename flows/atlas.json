@@ -3,13 +3,33 @@
     { "action": "goto", "value": "$url" },
     { "action": "fill", "target": "step_1.user_input", "value": "$ruc" },
     { "action": "fill", "target": "step_1.password_input", "value": "$password" },
+    { "action": "wait_time", "value": 250 }, 
     { "action": "click", "target": "step_1.login_button" },
     { "action": "click", "target": "step_1.fenix_radio_button" },
     { "action": "click", "target": "step_1.login_button" }
   ],
 
+  "pre_download": [
+    { "action": "click", "target": "step_2.button_cuentas" },
+    { "action": "wait_time", "value": 6000 }
+
+  ],
+
+  "download": [
+    { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_mes", "value": "$mes" },
+    { "action": "click", "target": "step_3.button_select_inicio" },
+    { "action": "seleccionar_fecha", "target": "step_3.button_select_inicio", "value": "$fecha_inicio" },
+    { "action": "click", "target": "step_3.button_select_fin" },
+    { "action": "seleccionar_fecha", "target": "step_3.button_select_fin", "value": "$fecha_fin" },
+
+
+    { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
+    { "action": "click", "target": "step_3.back_button" },
+    { "action": "click", "target": "step_2.button_cuentas" }
+  ],
+  
   "logout": [
-    { "action": "click", "target": "step_3.logout_button" },
-    { "action": "click", "target": "step_3.confirm_logout_button" }
+    { "action": "click", "target": "step_4.logout_button" },
+    { "action": "click", "target": "step_4.confirm_logout_button" }
   ]
 }

@@ -25,7 +25,8 @@ class GnbActions:
         executor.set_contexto(**self.contexto.to_dict())
 
         await executor.descargar_reportes(
-            pasos_descarga=self.flow["download"]
+            pasos_descarga=self.flow["download"],
+            banco = self.contexto.banco
         )
 
     async def logout(self, page):

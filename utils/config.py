@@ -41,16 +41,29 @@ def load_selectors():
     return {
         "continental": {
             "step_1": {
-                "online_banking": '#navbarsDefault > ul > li:nth-child(6) > button',
-                "companies_checkbox": 'input[name="Empresas"]',
+                "companies_checkbox": "input[name='Empresas']",
                 "ruc_input": '#docIdentidad',
                 "user_input": '#docIdentidad2',
                 "password_input": "#clave",
                 "login_button": '#ingresar_btn',
             },
             "step_2": {
+                "button_informes": "a#\\32 77",
+                "button_cuentas": "a#\\33 11",
+                
+                "cuenta_input_selector" : 'input[aria-controls="bs-select-1"]',
+                "periodo_input_selector" : 'input[aria-controls="bs-select-2"]',
+                "cuenta_dropdown_button": "button[data-id='cuenta']",
+                "periodo_dropdown_button": "button[data-id='fecha']",
+                
+
             },
             "step_3": {
+                "select_fecha_inicio": "#FechaDesde",
+                "select_fecha_fin": "#FechaHasta",
+                "excel_export_button": "button#btnVerExtractoExcel"
+            },
+            "step_4": {
                 "menu_button": "a#menu-user:has(span.fa-cog)",
                 "logout_button": "a:has(.fa-sign-out)"
 
@@ -66,12 +79,13 @@ def load_selectors():
             },
             "step_2": {
                 "button_products": "a:has-text('Productos')",
+                "list_selector": "body > div.page-container > div > div.content-wrapper",
+                "action_button_selector": "button.btn.btn-primary",
+                "action_button_text": "Ver extracto",    
                 
             },
             
             "step_3": {
-                "list_selector": ".selector ul li a.tablinks",
-                "extract_button": "#extracto-form > button",
                 "select_mes"   : "#form-content > div.row > div.form-group.col-md-2 > span > span.selection > span",
                 "select_inicio": "#extracto-pdf > div:nth-child(5) > span > span.selection > span",
                 "select_fin": "#extracto-pdf > div:nth-child(7) > span > span.selection > span",
@@ -123,12 +137,29 @@ def load_selectors():
                 "fenix_radio_button": 'role=radio[name="FENIX S.A. DE SEGUROS Y REASEGUROS"]'
             },
             "step_2": {
+                "button_cuentas": 'a[href="/atlasdigital/account/list"]',
+                
+                "list_selector": "div._secctionCardClassic_j03ri_157",
+                "action_button_selector": "div._showMovementsText_j03ri_291",
+                "action_button_text": "ver movimientos",    
             },
             "step_3": {
+                
+                "select_mes"   : 'button[role="combobox"].text-principal',
+                "button_select_inicio": "button[aria-haspopup='dialog']:nth-of-type(1)",
+                "button_select_fin": "button[aria-haspopup='dialog']:nth-of-type(2)",
+                "calendar_input": "#radix-\:r19m\: > div",
+                "donwload_button": "div._showMovementsText_j03ri_291",
+                "excel_export_button": "#radix-\:rh7\: > button:nth-child(1)",
+                "back_button" : "#radix-\:rh5\: > div.flex-col-reverse.sm\:flex-row.sm\:space-x-2.flex.justify-center.items-center.pb-4 > button",
+
+            },
+            "step_4": {
                 "logout_button": "div.flex.justify-center.items-center.gap-2 span.cursor-pointer",
-                "confirm_logout_button": "button:has-text('Aceptar')",
+                "confirm_logout_button": "button:has-text('Aceptar')"
             }
         },
+        
         "gnb": {
             "step_1": {
                 "client_access_button": "a.sign-in.hidden-lg",

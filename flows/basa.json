@@ -15,7 +15,6 @@
   ],
 
   "download": [
-    { "action": "click", "target": "step_3.extract_button" },
     { "action": "click", "target": "step_3.select_mes" },
     { "action": "fill", "target": "step_3.input_field", "value": "$mes" },
     { "action": "keyboard_press", "value": "Enter" },
