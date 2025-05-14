@@ -141,10 +141,57 @@ class ActionExecutor:
 
             except Exception as e:
                 self.logger.error(f"❌ Error con cuenta {nro_original}: {e}")
-
-
-
+                
     async def descargar_reportes_basa(self, pasos_descarga: list):
+        list_selector = self.selectors["step_2"].get("list_selector")
+        button_selector = self.selectors["step_2"].get("action_button_selector")
+        button_text = self.selectors["step_2"].get("action_button_text", "").strip().lower()
+
+        if not list_selector or not button_selector or not button_text:
+            self.logger.error("❌ Faltan selectores necesarios.")
+            return
+
+        contenedores = await self.page.query_selector_all(list_selector)
+        if not contenedores:
+            self.logger.warning("⚠️ No se encontraron contenedores.")
+            return
+
+        cuentas_excel = {
+            int(re.sub(r"\D", "", str(c.get("NROCUENTA", "")).strip())): c
+            for c in self.contexto.get("cuentas", []) if str(c.get("NROCUENTA", "")).strip().isdigit()
+        }
+
+        for contenedor in contenedores:
+            try:
+                texto = (await contenedor.inner_text()).replace("\xa0", " ").upper()
+                posibles = re.findall(r"\d{6,}", texto)
+                if not posibles:
+                    continue
+                nro_cuenta = int(posibles[0])
+                cuenta = cuentas_excel.get(nro_cuenta)
+                if not cuenta:
+                    continue
+
+                self.logger.info(f"✅ Coincidencia: UI={nro_cuenta} == Excel={cuenta['NROCUENTA']}")
+                clave = generar_clave_cuenta(cuenta)
+                ruta = self.contexto.get("rutas_por_cuenta", {}).get(clave)
+                if not ruta:
+                    continue
+
+                self.ruta_salida = ruta[0] if isinstance(ruta, tuple) else ruta
+                self.contexto["ruta_descarga"] = self.ruta_salida
+
+                botones = await contenedor.query_selector_all(button_selector)
+                for boton in botones:
+                    texto_boton = (await boton.inner_text()).strip().lower()
+                    if button_text in texto_boton:
+                        await boton.click()
+                        await self.run_flow(pasos_descarga)
+                        break
+            except Exception as e:
+                self.logger.error(f"❌ Error procesando contenedor: {e}")
+
+    async def descargar_reportes_Atlas(self, pasos_descarga: list):
         list_selector = self.selectors["step_2"].get("list_selector")
         button_selector = self.selectors["step_2"].get("action_button_selector")
         button_text = self.selectors["step_2"].get("action_button_text", "").strip().lower()
@@ -295,23 +342,28 @@ class ActionExecutor:
             elif action == "click":
                 self.logger.info(f"🖱️ Intentando click en {selector}")
                 try:
-                    # Espera a que el elemento esté visible
-                    elemento = await self.page.wait_for_selector(selector, state="visible", timeout=20000)
-                    # Asegura que no esté deshabilitado
-                    await self.page.wait_for_function(
-                        "element => element && !element.disabled",
-                        arg=elemento,
-                        timeout=2000
-                    )
-                    # Desplaza al elemento al viewport si es necesario
-                    await elemento.scroll_into_view_if_needed()
+                    # Esperar a que el selector esté presente en el DOM (aunque no visible aún)
+                    await self.page.wait_for_selector(selector, timeout=20000)
 
-                    # Realiza el clic de forma segura
-                    await elemento.click(force=True)
+                    # Intentar esperar visibilidad y disponibilidad normal
+                    try:
+                        elemento = await self.page.wait_for_selector(selector, state="visible", timeout=5000)
+                        await self.page.wait_for_function("el => !el.disabled", arg=elemento, timeout=2000)
+                        await elemento.scroll_into_view_if_needed()
+                        await elemento.click(force=True)
+                        self.logger.info(f"✅ Click exitoso en {selector}")
+                    except Exception as e_visibilidad:
+                        self.logger.warning(f"⚠️ Elemento no visible o no interactivo: {e_visibilidad}")
+                        self.logger.info(f"🛠️ Intentando forzar click con JavaScript en {selector}...")
+                        await self.page.evaluate(f'''
+                            const el = document.querySelector("{selector}");
+                            if (el) el.click();
+                        ''')
+                        self.logger.info(f"✅ Click forzado con JS en {selector}")
 
-                    self.logger.info(f"✅ Click exitoso en {selector}")
                 except Exception as e:
                     self.logger.error(f"❌ Error al hacer click en {selector}: {e}")
+
             elif action == "wait_for":
                 self.logger.info(f"⏳ Esperando selector {selector}")
                 await self.page.wait_for_selector(selector)

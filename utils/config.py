@@ -93,7 +93,7 @@ def load_selectors():
                 "excel_export_button": "#extracto-pdf > div.col-md-7 > div > div:nth-child(2) > button",
             },
             "step_4": {
-                "menu_button": '#navbar-mobile > ul > li > a',
+                "menu_button": '#navbar-mobile .dropdown-toggle',
                 "logout_button": '#navbar-mobile > ul > li > ul > li:nth-child(4) > a'
             }
         },

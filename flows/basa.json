@@ -30,7 +30,9 @@
   ],
 
   "logout": [
+    { "action": "buscar", "target": "step_4.menu_button" },
     { "action": "click", "target": "step_4.menu_button" },
+    { "action": "buscar", "target": "step_4.logout_button" },
     { "action": "click", "target": "step_4.logout_button" }
   ]
 }
