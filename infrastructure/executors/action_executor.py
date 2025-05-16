@@ -90,6 +90,69 @@ class ActionExecutor:
             self.logger.warning(f"⚠️ Banco '{banco}' no tiene lógica personalizada. Ejecutando método genérico.")
             await self.descargar_reportes_generico(pasos_descarga)
     
+    async def descargar_reportes_gnb(self, pasos_descarga: list):
+        list_selector = self.selectors["step_2"].get("list_selector")
+        if not list_selector:
+            self.logger.error("❌ Falta 'list_selector' en los selectores del paso 2.")
+            return
+
+        cuentas_excel = {
+            int(re.sub(r"\D", "", str(c.get("NROCUENTA", "")).strip())): c
+            for c in self.contexto.get("cuentas", []) if str(c.get("NROCUENTA", "")).strip().isdigit()
+        }
+
+        processed_cuentas = set()
+
+        while True:
+            contenedores = await self.page.query_selector_all(list_selector)
+            if not contenedores:
+                self.logger.warning("⚠️ No se encontraron contenedores de cuentas en el DOM.")
+                break
+
+            avanzar = False
+
+            for contenedor in contenedores:
+                try:
+                    texto_contenedor = (await contenedor.inner_text()).replace("\xa0", " ").upper()
+                    posibles = re.findall(r"\d{6,}", texto_contenedor)
+                    if not posibles:
+                        continue
+                    nro_cuenta = int(posibles[0])
+                except Exception as e:
+                    self.logger.debug(f"❌ Error extrayendo cuenta: {e}")
+                    continue
+
+                if nro_cuenta in processed_cuentas:
+                    continue
+
+                cuenta = cuentas_excel.get(nro_cuenta)
+                if not cuenta:
+                    processed_cuentas.add(nro_cuenta)
+                    continue
+
+                self.logger.info(f"🟢 Coincidencia: UI={nro_cuenta} == Excel={cuenta['NROCUENTA']}")
+                clave = generar_clave_cuenta(cuenta)
+                ruta = self.contexto.get("rutas_por_cuenta", {}).get(clave)
+                if not ruta:
+                    processed_cuentas.add(nro_cuenta)
+                    continue
+
+                self.contexto["ruta_descarga"] = ruta[0] if isinstance(ruta, tuple) else ruta
+
+                try:
+                    await contenedor.click()
+                except Exception as e:
+                    continue
+
+                await self.run_flow(pasos_descarga)
+                processed_cuentas.add(nro_cuenta)
+                avanzar = True
+                break  # para recargar el DOM después
+
+            if not avanzar:
+                break
+
+        
     async def descargar_reportes_continental(self, page, pasos_descarga: list):
         self.page = page
         self.logger.info("🧭 Entrando a descargar_reportes_continental()")
@@ -191,7 +254,7 @@ class ActionExecutor:
             except Exception as e:
                 self.logger.error(f"❌ Error procesando contenedor: {e}")
 
-    async def descargar_reportes_Atlas(self, pasos_descarga: list):
+    async def descargar_reportes_atlas(self, pasos_descarga: list):
         list_selector = self.selectors["step_2"].get("list_selector")
         button_selector = self.selectors["step_2"].get("action_button_selector")
         button_text = self.selectors["step_2"].get("action_button_text", "").strip().lower()
@@ -200,86 +263,92 @@ class ActionExecutor:
             self.logger.error("❌ Parámetros 'list_selector', 'action_button_selector' o 'action_button_text' están incompletos.")
             return
 
-        contenedores = await self.page.query_selector_all(list_selector)
-        if not contenedores:
-            self.logger.warning("⚠️ No se encontraron contenedores de cuentas.")
-            return
-
         cuentas_excel = {
             int(re.sub(r"\D", "", str(c.get("NROCUENTA", "")).strip())): c
             for c in self.contexto.get("cuentas", []) if str(c.get("NROCUENTA", "")).strip().isdigit()
         }
 
-        for contenedor in contenedores:
-            try:
-                texto_contenedor = (await contenedor.inner_text()).replace("\xa0", " ").upper()
-                posibles = re.findall(r"\d{6,}", texto_contenedor)
-                if not posibles:
-                    self.logger.debug(f"🔍 Sin número de cuenta detectado en: {texto_contenedor[:50]}...")
-                    continue
-                nro_cuenta = int(posibles[0])
-            except Exception as e:
-                self.logger.debug(f"❌ Error extrayendo cuenta del contenedor: {e}")
-                continue
+        while True:
+            contenedores = await self.page.query_selector_all(list_selector)
+            if not contenedores:
+                self.logger.warning("⚠️ No se encontraron contenedores de cuentas.")
+                return
 
-            cuenta = cuentas_excel.get(nro_cuenta)
-            self.logger.info(f"🟢 Coincidencia: UI={nro_cuenta} == Excel={cuenta['NROCUENTA']}")
-            if not cuenta:
-                self.logger.info(f"🔸 Cuenta {nro_cuenta} no encontrada en Excel.")
-                continue
-
-            clave = generar_clave_cuenta(cuenta)
-            ruta = self.contexto.get("rutas_por_cuenta", {}).get(clave)
-            if not ruta:
-                self.logger.warning(f"🚫 No se encontró ruta para {clave}")
-                continue
-
-            self.ruta_salida = ruta[0] if isinstance(ruta, tuple) else ruta
-            self.contexto["ruta_descarga"] = self.ruta_salida
-            self.logger.info(f"📁 Usando ruta: {self.ruta_salida}")
-
-            botones = await contenedor.query_selector_all(button_selector)
-            boton_clickable = None
-            for boton in botones:
+            cuentas_en_ui = []
+            for contenedor in contenedores:
                 try:
-                    texto_boton = (await boton.inner_text()).strip().lower()
-                    if button_text in texto_boton:
-                        boton_clickable = boton
-                        break
-                except Exception as e:
-                    self.logger.debug(f"⚠️ Error leyendo texto del botón: {e}")
+                    texto_contenedor = (await contenedor.inner_text()).replace("\xa0", " ").upper()
+                    posibles = re.findall(r"\d{6,}", texto_contenedor)
+                    if not posibles:
+                        continue
+                    nro_cuenta = int(posibles[0])
+                    cuentas_en_ui.append((nro_cuenta, contenedor))
+                except:
                     continue
 
-            if boton_clickable:
-                await boton_clickable.click()
-                await self.run_flow(pasos_descarga)
-            else:
-                self.logger.warning(f"❌ No se encontró botón con texto '{button_text}' en contenedor de cuenta {nro_cuenta}")
+            if not cuentas_en_ui:
+                self.logger.warning("⚠️ No se detectaron cuentas en el DOM.")
+                return
+
+            for nro_cuenta, _ in cuentas_en_ui:
+                # Recarga la vista para evitar referencias inválidas
+                await self.page.goto("https://secure.atlas.com.py/atlasdigital/account/list")
+                await self.page.wait_for_selector(list_selector)
+                await self.page.wait_for_timeout(1000)
+
+                contenedores_actualizados = await self.page.query_selector_all(list_selector)
+
+                contenedor_objetivo = None
+                for contenedor in contenedores_actualizados:
+                    texto_contenedor = (await contenedor.inner_text()).replace("\xa0", " ").upper()
+                    if str(nro_cuenta) in texto_contenedor:
+                        contenedor_objetivo = contenedor
+                        break
+
+                if not contenedor_objetivo:
+                    self.logger.warning(f"❌ Contenedor no encontrado para cuenta {nro_cuenta}")
+                    continue
+
+                cuenta = cuentas_excel.get(nro_cuenta)
+                if not cuenta:
+                    self.logger.info(f"🔸 Cuenta {nro_cuenta} no encontrada en Excel.")
+                    continue
+
+                clave = generar_clave_cuenta(cuenta)
+                ruta = self.contexto.get("rutas_por_cuenta", {}).get(clave)
+                if not ruta:
+                    self.logger.warning(f"🚫 No se encontró ruta para {clave}")
+                    continue
+
+                self.ruta_salida = ruta[0] if isinstance(ruta, tuple) else ruta
+                self.contexto["ruta_descarga"] = self.ruta_salida
+                self.logger.info(f"📁 Usando ruta: {self.ruta_salida}")
+
+                botones = await contenedor_objetivo.query_selector_all(button_selector)
+                boton_clickable = None
+                for boton in botones:
+                    try:
+                        texto_boton = (await boton.inner_text()).strip().lower()
+                        if button_text in texto_boton:
+                            boton_clickable = boton
+                            break
+                    except:
+                        continue
+
+                if boton_clickable:
+                    try:
+                        await boton_clickable.click()
+                        await self.run_flow(pasos_descarga)
+                    except Exception as e:
+                        self.logger.error(f"❌ Error al hacer click: {e}")
+                        continue
+                else:
+                    self.logger.warning(f"❌ No se encontró botón con texto '{button_text}' en cuenta {nro_cuenta}")
+
+            break
+
                 
-                
-    
-    async def seleccionar_fecha(self, target: str, value: str):
-
-        fecha = datetime.strptime(value.split(" ")[0], "%Y-%m-%d")
-        mes = str(fecha.month - 1)
-        año = str(fecha.year)
-        dia = str(fecha.day)
-
-        calendar_root = self.selectors["step_3"].get("calendar_input")
-
-        await self.page.wait_for_selector(f"{calendar_root} select[name='months']", timeout=10000)
-        await self.page.wait_for_selector(f"{calendar_root} select[name='years']", timeout=10000)
-
-        await self.page.select_option(f"{calendar_root} select[name='months']", mes)
-        await self.page.select_option(f"{calendar_root} select[name='years']", año)
-
-        botones = await self.page.query_selector_all(f"{calendar_root} button[name='day']")
-        for boton in botones:
-            if (await boton.inner_text()).strip() == dia:
-                await boton.click()
-                break
-
-    
+   
     async def seleccionar_opcion_dropdown(self, target: str, value: str):
         try:
             paso, campo = target.split(".")
@@ -417,9 +486,7 @@ class ActionExecutor:
             raise
         
     def _parse_value(self, value: str) -> str:
-        """
-        Reemplaza valores que comienzan con '$' por su valor real, buscando en credentials o contexto.
-        """
+
         if isinstance(value, str) and value.startswith("$"):
             variable_name = value[1:]
             resolved = self.credentials.get(variable_name) or self.contexto.get(variable_name)

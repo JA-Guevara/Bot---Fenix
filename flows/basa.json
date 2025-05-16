@@ -30,6 +30,7 @@
   ],
 
   "logout": [
+    { "action": "wait_time", "value": 3000 }, 
     { "action": "buscar", "target": "step_4.menu_button" },
     { "action": "click", "target": "step_4.menu_button" },
     { "action": "buscar", "target": "step_4.logout_button" },

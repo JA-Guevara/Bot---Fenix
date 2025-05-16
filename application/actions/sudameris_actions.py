@@ -10,11 +10,13 @@ class SudamerisActions(LoginStrategy):
         self.flow = flow
         self.contexto = contexto
 
-    async def login(self, page):
+    async def login(self, page,browser):
         self.logger.info("🌐 Login Banco Sudameris...")
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["login"])
-
+        
+        await browser.save_context_storage("sudameris")
+        
     async def pre_download(self, page):
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["pre_download"])

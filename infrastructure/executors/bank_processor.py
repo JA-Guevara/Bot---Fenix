@@ -73,7 +73,12 @@ class BankProcessor:
                 strategy.set_contexto(**contexto.to_dict())
 
             self.logger.info("Iniciando login.")
-            await strategy.login(page)
+
+            if self.nombre_banco in ["sudameris", "basa"]:
+                await strategy.login(page, browser)
+            else:
+                await strategy.login(page)
+
             self.logger.info("Login completado.")
 
             self.logger.info("Ejecutando pre-descarga.")

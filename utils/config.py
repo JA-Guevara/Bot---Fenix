@@ -108,6 +108,8 @@ def load_selectors():
             "step_2": {
             },
             "step_3": {
+            },
+            "step_4": {
             }
         },
         
@@ -139,8 +141,8 @@ def load_selectors():
             "step_2": {
                 "button_cuentas": 'a[href="/atlasdigital/account/list"]',
                 
-                "list_selector": "div._secctionCardClassic_j03ri_157",
-                "action_button_selector": "div._showMovementsText_j03ri_291",
+                "list_selector": "div._secctionCardClassic_t5kfd_79",
+                "action_button_selector": "div._showMovementsText_t5kfd_146",
                 "action_button_text": "ver movimientos",    
             },
             "step_3": {
@@ -149,9 +151,9 @@ def load_selectors():
                 "button_select_inicio": "button[aria-haspopup='dialog']:nth-of-type(1)",
                 "button_select_fin": "button[aria-haspopup='dialog']:nth-of-type(2)",
                 "calendar_input": "#radix-\:r19m\: > div",
-                "donwload_button": "div._showMovementsText_j03ri_291",
-                "excel_export_button": "#radix-\:rh7\: > button:nth-child(1)",
-                "back_button" : "#radix-\:rh5\: > div.flex-col-reverse.sm\:flex-row.sm\:space-x-2.flex.justify-center.items-center.pb-4 > button",
+                "donwload_button": "button.bg-principal.border-2.text-primary-foreground.px-4.py-2.w-full.md\\:w-28.text-xs.h-7",
+                "excel_export_button": 'button:has(img[src*="xls_icon.png"])',
+                "back_button" : 'button.bg-principal.text-white.w-36:has-text("VOLVER")',
 
             },
             "step_4": {
@@ -162,17 +164,30 @@ def load_selectors():
         
         "gnb": {
             "step_1": {
-                "client_access_button": "a.sign-in.hidden-lg",
+                "client_access_button": '#logCliente',
                 "empresa_radio": "label[for='rCompany']",
                 "ruc_input": "#ruc",
                 "user_input": "#documentNumber",    
                 "user2_input": "#access-username",  
                 "password_input": "#access-pin",
-                "login_button": "#btnLogin"     
+                "login_button": "#bSubmit",
+                "login_button2": "#btnLogin"        
             },
-            "step_2": {},
+            "step_2": {
+                "button_cuentas_ahorros": "span.enlace:has-text('Cuentas y Ahorro')",
+                "list_selector": "table.cuentas-table td.first.product div:first-child em",
+                },
             "step_3": {
-                "logout_button": "#rwb_header_user_box_salir"         
+               "button_estracto": "#tabs_OperativasConsultasextractos",
+               
+               "button_desplegar_fecha": "#h3QueryDate",
+               "select_inicio": "#fechaDesdeStatement",
+               "select_fin": "#fechaHastaStatement",
+               "excel_export_button": "#botonDescargaExcel"
+            
+            },
+            "step_4": {
+                "logout_button": "#rwb_header_user_box_salir"
             }
         }
 

@@ -11,21 +11,17 @@
 
   "pre_download": [
     { "action": "click", "target": "step_2.button_cuentas" },
-    { "action": "wait_time", "value": 6000 }
+    { "action": "wait_time", "value": 3000 }
 
   ],
 
   "download": [
     { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_mes", "value": "$mes" },
-    { "action": "click", "target": "step_3.button_select_inicio" },
-    { "action": "seleccionar_fecha", "target": "step_3.button_select_inicio", "value": "$fecha_inicio" },
-    { "action": "click", "target": "step_3.button_select_fin" },
-    { "action": "seleccionar_fecha", "target": "step_3.button_select_fin", "value": "$fecha_fin" },
-
-
+    { "action": "click", "target": "step_3.donwload_button" },
     { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
     { "action": "click", "target": "step_3.back_button" },
-    { "action": "click", "target": "step_2.button_cuentas" }
+
+    { "action": "wait_time", "value": 2000 }
   ],
   
   "logout": [

@@ -1,14 +1,35 @@
 {
   "login": [
     { "action": "goto", "value": "$url" },
-
+    { "action": "click", "target": "step_1.client_access_button" },
     { "action": "click", "target": "step_1.empresa_radio" },
     { "action": "fill", "target": "step_1.ruc_input", "value": "$ruc" },
     { "action": "fill", "target": "step_1.user_input", "value": "$user2" },
+    { "action": "click", "target": "step_1.login_button" },
     { "action": "fill", "target": "step_1.user2_input", "value": "$user" },
     { "action": "fill", "target": "step_1.password_input", "value": "$password" },
-    { "action": "click", "target": "step_1.login_button" }
+    { "action": "click", "target": "step_1.login_button2" }
   ],
+  "pre_download": [
+    { "action": "buscar", "target": "step_2.button_cuentas_ahorros" },
+    { "action": "click", "target": "step_2.button_cuentas_ahorros" },
+        { "action": "wait_time", "value": 5000 }
+    ],
+
+  "download": [
+    { "action": "buscar", "target": "step_3.button_estracto" },
+    { "action": "wait_time", "value": 1000 },
+    { "action": "click", "target": "step_3.button_estracto" },
+    { "action": "buscar", "target": "step_3.button_desplegar_fecha" },
+    { "action": "click", "target": "step_3.button_desplegar_fecha" },
+    { "action": "click", "target": "step_3.select_inicio" },
+    { "action": "fill", "target": "step_3.select_inicio", "value": "$fecha_inicio" },
+    { "action": "click", "target": "step_3.select_fin" },
+    { "action": "fill", "target": "step_3.select_fin", "value": "$fecha_fin" },
+    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
+    { "action": "click", "target": "step_2.button_cuentas_ahorros" }
+    ],
   "logout": [
     { "action": "click", "target": "step_3.logout_button" }
   ]
