@@ -1,8 +1,8 @@
+# application/actions/gnb_actions.py
 import logging
-from domain.login_interface import LoginStrategy
 from infrastructure.executors.action_executor import ActionExecutor
 
-class AtlasActions(LoginStrategy):  # hereda LoginStrategy para mantener el contrato
+class GnbActions:
     def __init__(self, credentials, selectors, flow,contexto):
         self.logger = logging.getLogger(__name__)
         self.credentials = credentials
@@ -11,7 +11,7 @@ class AtlasActions(LoginStrategy):  # hereda LoginStrategy para mantener el cont
         self.contexto = contexto
 
     async def login(self, page):
-        self.logger.info("🌐 Login Banco Atlas...")
+        self.logger.info("🌐 Login Banco GNB...")
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["login"])
 
@@ -23,6 +23,7 @@ class AtlasActions(LoginStrategy):  # hereda LoginStrategy para mantener el cont
         
         executor = ActionExecutor(page, self.selectors, self.credentials)
         executor.set_contexto(**self.contexto.to_dict())
+
         await executor.descargar_reportes(
             pasos_descarga=self.flow["download"],
             banco = self.contexto.banco
@@ -31,4 +32,3 @@ class AtlasActions(LoginStrategy):  # hereda LoginStrategy para mantener el cont
     async def logout(self, page):
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["logout"])
-

@@ -1,29 +1,36 @@
 import asyncio
-import json
-from utils.config import get_credentials, load_selectors
-from infrastructure.browser.browser_manager import BrowserManager
-from application.actions.itau_actions import ItauActions
+from infrastructure.executors.bank_processor import BankProcessor
+ 
 from infrastructure.logger.logging_config import setup_logging
 
 setup_logging()
 
-async def run_login_itau():
-    print("🌀 Login Banco Itaú")
-    browser_manager = BrowserManager(headless=False)
-    page = await browser_manager.get_new_page()
+async def test_procesar_basa():
+    processor = BankProcessor("basa")
+    
+    print("📌 Fechas generadas:")
+    print(f"Fecha inicio: {processor.fecha_inicio}")
+    print(f"Fecha fin: {processor.fecha_fin}")
+    print(f"Mes: {processor.mes}")
+    
+    print("\n📌 Cuentas a procesar:")
+    for cuenta in processor.cuentas:
+        print(cuenta)
 
-    credentials = get_credentials("itau")
-    selectors = load_selectors()["itau"]
+    print("\n📁 Probando generación de nombre y ruta por cuenta:")
+    for cuenta in processor.cuentas:
+        ruta = generar_ruta_archivo(
+            base_dir=processor.base_dir,
+            banco=processor.nombre_banco,
+            tipo_archivo="EXTRACTO",
+            tipo_cuenta=cuenta["TIPOCUENTA"],
+            nro_cuenta=str(cuenta["NROCUENTA"]),
+            tipo_moneda=cuenta["MONEDA"]
+        )
+        print(f"📄 Ruta completa: {ruta}")
 
-    with open("flows/itau.json", "r", encoding="utf-8") as f:
-        flow = json.load(f)
-
-    login = ItauActions(credentials, selectors, flow)
-    await login.login(page)
-
-    print("✅ Login completado.")
-    await page.wait_for_timeout(5000)
-    await browser_manager.close_browser()
+    print("\n🚀 Ejecutando proceso completo (login, descarga, logout)...")
+    await processor.ejecutar()
 
 if __name__ == "__main__":
-    asyncio.run(run_login_itau())
+    asyncio.run(test_procesar_basa())

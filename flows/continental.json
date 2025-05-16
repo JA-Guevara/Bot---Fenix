@@ -1,16 +1,36 @@
 {
     "login": [
       { "action": "goto", "value": "$url" },
-      { "action": "click", "target": "step_1.online_banking" },
       { "action": "click", "target": "step_1.companies_checkbox" },
       { "action": "fill", "target": "step_1.ruc_input", "value": "$ruc" },
       { "action": "fill", "target": "step_1.user_input", "value": "$user" },
       { "action": "fill", "target": "step_1.password_input", "value": "$password" },
-      { "action": "click", "target": "step_1.login_button" }
+      { "action": "click", "target": "step_1.login_button" },
+      { "action": "wait_time", "value": 9900 },
+      { "action": "buscar", "target": "step_2.button_informes" }
+
+    ],
+
+    "pre_download": [
+
+      { "action": "click", "target": "step_2.button_informes" },
+      { "action": "wait_time", "value": 5000 },
+      { "action": "buscar", "target": "step_2.button_cuentas" },
+      { "action": "click", "target": "step_2.button_cuentas" },
+      { "action": "wait_time", "value": 10000 }
+    ],
+
+  "download": [
+      { "action": "click", "target": "step_3.select_fecha_inicio" },
+      { "action": "fill", "target": "step_3.select_fecha_inicio", "value": "$fecha_inicio" },
+      { "action": "click", "target": "step_3.select_fecha_fin" },
+      { "action": "fill", "target": "step_3.select_fecha_fin", "value": "$fecha_fin" },
+      { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"}
+
     ],
 
     "logout": [
-      { "action": "click", "target": "step_3.menu_button" },
-      { "action": "click", "target": "step_3.logout_button" }
+      { "action": "click", "target": "step_4.menu_button" },
+      { "action": "click", "target": "step_4.logout_button" }
     ]
   }

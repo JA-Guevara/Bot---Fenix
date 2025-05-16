@@ -7,21 +7,28 @@ import json
 load_dotenv()
 
 # Tiempo de espera general
-TIMEOUT = int(os.getenv("TIMEOUT", 120))
 
+PERIODO_DESCARGA = os.getenv("PERIODO_DESCARGA", "mensual")  # por defecto mensual
+QUINCENA = os.getenv("QUINCENA") 
+RUTA_EXCEL = os.getenv("RUTA_EXCEL")
+BASE_DIR = os.getenv("BASE_DIR")
 
-def get_environment():
-    return os.getenv("ENVIRONMENT", "development")
 
 def get_credentials(bank_name: str):
-    
     upper = bank_name.upper()
-    return {
+    
+    credentials = {
         "url": os.getenv(f"{upper}_URL"),
         "ruc": os.getenv(f"{upper}_RUC"),
         "user": os.getenv(f"{upper}_USER"),
         "password": os.getenv(f"{upper}_PASS"),
     }
+
+    if upper == "GNB":
+        credentials["user2"] = os.getenv(f"{upper}_USER2")
+
+    return credentials
+
 
 
 def load_flow(bank_name):
@@ -34,16 +41,29 @@ def load_selectors():
     return {
         "continental": {
             "step_1": {
-                "online_banking": '#navbarsDefault > ul > li:nth-child(6) > button',
-                "companies_checkbox": 'input[name="Empresas"]',
+                "companies_checkbox": "input[name='Empresas']",
                 "ruc_input": '#docIdentidad',
                 "user_input": '#docIdentidad2',
                 "password_input": "#clave",
                 "login_button": '#ingresar_btn',
             },
             "step_2": {
+                "button_informes": "a#\\32 77",
+                "button_cuentas": "a#\\33 11",
+                
+                "cuenta_input_selector" : 'input[aria-controls="bs-select-1"]',
+                "periodo_input_selector" : 'input[aria-controls="bs-select-2"]',
+                "cuenta_dropdown_button": "button[data-id='cuenta']",
+                "periodo_dropdown_button": "button[data-id='fecha']",
+                
+
             },
             "step_3": {
+                "select_fecha_inicio": "#FechaDesde",
+                "select_fecha_fin": "#FechaHasta",
+                "excel_export_button": "button#btnVerExtractoExcel"
+            },
+            "step_4": {
                 "menu_button": "a#menu-user:has(span.fa-cog)",
                 "logout_button": "a:has(.fa-sign-out)"
 
@@ -58,10 +78,23 @@ def load_selectors():
                 "password_virtual_selector": "[data-valor]"
             },
             "step_2": {
+                "button_products": "a:has-text('Productos')",
+                "list_selector": "body > div.page-container > div > div.content-wrapper",
+                "action_button_selector": "button.btn.btn-primary",
+                "action_button_text": "Ver extracto",    
+                
             },
+            
             "step_3": {
-                "menu_button": 'a.dropdown-toggle[data-toggle="dropdown"]',
-                "logout_button": 'a.bttn-logout[href="/be/logout"]'
+                "select_mes"   : "#form-content > div.row > div.form-group.col-md-2 > span > span.selection > span",
+                "select_inicio": "#extracto-pdf > div:nth-child(5) > span > span.selection > span",
+                "select_fin": "#extracto-pdf > div:nth-child(7) > span > span.selection > span",
+                "input_field": "body > span > span > span.select2-search.select2-search--dropdown > input",
+                "excel_export_button": "#extracto-pdf > div.col-md-7 > div > div:nth-child(2) > button",
+            },
+            "step_4": {
+                "menu_button": '#navbar-mobile .dropdown-toggle',
+                "logout_button": '#navbar-mobile > ul > li > ul > li:nth-child(4) > a'
             }
         },
 
@@ -75,6 +108,8 @@ def load_selectors():
             "step_2": {
             },
             "step_3": {
+            },
+            "step_4": {
             }
         },
         
@@ -104,10 +139,56 @@ def load_selectors():
                 "fenix_radio_button": 'role=radio[name="FENIX S.A. DE SEGUROS Y REASEGUROS"]'
             },
             "step_2": {
+                "button_cuentas": 'a[href="/atlasdigital/account/list"]',
+                
+                "list_selector": "div._secctionCardClassic_t5kfd_79",
+                "action_button_selector": "div._showMovementsText_t5kfd_146",
+                "action_button_text": "ver movimientos",    
             },
             "step_3": {
+                
+                "select_mes"   : 'button[role="combobox"].text-principal',
+                "button_select_inicio": "button[aria-haspopup='dialog']:nth-of-type(1)",
+                "button_select_fin": "button[aria-haspopup='dialog']:nth-of-type(2)",
+                "calendar_input": "#radix-\:r19m\: > div",
+                "donwload_button": "button.bg-principal.border-2.text-primary-foreground.px-4.py-2.w-full.md\\:w-28.text-xs.h-7",
+                "excel_export_button": 'button:has(img[src*="xls_icon.png"])',
+                "back_button" : 'button.bg-principal.text-white.w-36:has-text("VOLVER")',
+
+            },
+            "step_4": {
                 "logout_button": "div.flex.justify-center.items-center.gap-2 span.cursor-pointer",
-                "confirm_logout_button": "button:has-text('Aceptar')",
+                "confirm_logout_button": "button:has-text('Aceptar')"
+            }
+        },
+        
+        "gnb": {
+            "step_1": {
+                "client_access_button": '#logCliente',
+                "empresa_radio": "label[for='rCompany']",
+                "ruc_input": "#ruc",
+                "user_input": "#documentNumber",    
+                "user2_input": "#access-username",  
+                "password_input": "#access-pin",
+                "login_button": "#bSubmit",
+                "login_button2": "#btnLogin"        
+            },
+            "step_2": {
+                "button_cuentas_ahorros": "span.enlace:has-text('Cuentas y Ahorro')",
+                "list_selector": "table.cuentas-table td.first.product div:first-child em",
+                },
+            "step_3": {
+               "button_estracto": "#tabs_OperativasConsultasextractos",
+               
+               "button_desplegar_fecha": "#h3QueryDate",
+               "select_inicio": "#fechaDesdeStatement",
+               "select_fin": "#fechaHastaStatement",
+               "excel_export_button": "#botonDescargaExcel"
+            
+            },
+            "step_4": {
+                "logout_button": "#rwb_header_user_box_salir"
             }
         }
+
     }

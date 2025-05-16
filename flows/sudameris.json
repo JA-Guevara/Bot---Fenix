@@ -4,7 +4,21 @@
       { "action": "click", "target": "step_1.open_login" },
       { "action": "fill", "target": "step_1.user_input", "value": "$user" },
       { "action": "fill", "target": "step_1.password_input", "value": "$password" },
-      { "action": "click", "target": "step_1.login_button" }
+      { "action": "click", "target": "step_1.login_button" },
+      { "action": "wait_time", "value": 1000000 }
+    ],
+
+    "pre_download": [
+
+      { "action": "click", "target": "step_2.button_informes" }
+    ],
+
+    "download": [
+    ],
+
+    "logout": [
+      { "action": "click", "target": "step_4.menu_button" },
+      { "action": "click", "target": "step_4.logout_button" }
     ]
   }
   
