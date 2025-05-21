@@ -1,5 +1,7 @@
 import os
 import shutil
+import json
+
 from playwright.async_api import async_playwright
 
 class BrowserManager:
@@ -21,33 +23,46 @@ class BrowserManager:
         usar_cookies = banco and os.path.exists(storage_path)
 
         if usar_cookies:
-            print(f"🧠 Cargando cookies para {banco}")
+            print(f"🧠 Cargando storage_state para {banco}")
             self.context = await self.browser.new_context(
                 storage_state=storage_path,
                 accept_downloads=True
             )
         else:
             print(f"🆕 Contexto limpio para {banco or 'sesión anónima'}")
-            self.context = await self.browser.new_context(
-                accept_downloads=True
-            )
+            self.context = await self.browser.new_context(accept_downloads=True)
+
+            # 👉 Cargar cookies solo si es sudameris
+            if banco:
+                cookies_file = os.path.join(self.cookie_dir, f"cookies_{banco.lower()}.json")
+            else:
+                cookies_file = None
+
+            if banco and banco.lower() == "sudameris" and cookies_file and os.path.exists(cookies_file):
+                print(f"🍪 Cargando cookies manuales desde {cookies_file}")
+                with open(cookies_file, "r") as f:
+                    cookies = json.load(f)
+                for cookie in cookies:
+                    # Convertir expires si es int
+                    if isinstance(cookie.get("expires"), int):
+                        cookie["expires"] = float(cookie["expires"])
+
+                    # Normalizar sameSite si viene como null o inválido
+                    same_site = cookie.get("sameSite")
+                    if same_site is None or same_site not in ("Lax", "Strict", "None"):
+                        cookie["sameSite"] = "Lax"  # valor por defecto seguro
+
+                await self.context.add_cookies(cookies)
+
 
         return self.context
 
-    async def save_context_storage(self, banco=None):
-
-        if banco:
-            ruta_dir = os.path.join("storage", "cookies")
-            os.makedirs(ruta_dir, exist_ok=True)
-
-            storage_path = os.path.join(self.cookie_dir, f"{banco.lower()}.json")
-            await self.context.storage_state(path=storage_path)
-            print(f"💾 Cookies guardadas para banco: {banco}")
             
     async def get_new_page(self):
-
-        context = await self.create_browser_context()
+        banco = getattr(self, "nombre_banco", None)
+        context = await self.create_browser_context(banco=banco)
         return await context.new_page()
+
     
     async def close_browser(self):
 

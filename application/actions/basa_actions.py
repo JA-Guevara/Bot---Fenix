@@ -10,12 +10,11 @@ class BasaActions(LoginStrategy):
         self.flow = flow
         self.contexto = contexto
 
-    async def login(self, page,browser):
+    async def login(self, page):
         self.logger.info("🌐 Login Banco Basa...")
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["login"])
-        await browser.save_context_storage("basa")
-        await executor.verificar_cambio_contrasena(self.selectors.get("selector"))
+
     
     async def pre_download(self, page):
         executor = ActionExecutor(page, self.selectors, self.credentials)

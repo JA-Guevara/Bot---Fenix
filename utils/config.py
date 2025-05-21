@@ -141,9 +141,10 @@ def load_selectors():
             "step_2": {
                 "button_cuentas": 'a[href="/atlasdigital/account/list"]',
                 
-                "list_selector": "div._secctionCardClassic_t5kfd_79",
-                "action_button_selector": "div._showMovementsText_t5kfd_146",
-                "action_button_text": "ver movimientos",    
+                "list_selector": 'div[class^="_secctionCardClassic_"]',
+                "action_button_selector": "div[class^=\"_showMovementsText_\"]",
+                "action_button_text": "ver movimientos"
+
             },
             "step_3": {
                 
@@ -175,19 +176,24 @@ def load_selectors():
             },
             "step_2": {
                 "button_cuentas_ahorros": "span.enlace:has-text('Cuentas y Ahorro')",
-                "list_selector": "table.cuentas-table td.first.product div:first-child em",
+                "list_selector": "td.first.product.cardNumTip.yaguareteEvent div:first-child em",
                 },
             "step_3": {
                "button_estracto": "#tabs_OperativasConsultasextractos",
+               "button_desplegar_fecha": 'h3.dateStatement:has-text("Fecha")',
+               "contenedor_fecha": "#slideQueryDate",
                
-               "button_desplegar_fecha": "#h3QueryDate",
                "select_inicio": "#fechaDesdeStatement",
                "select_fin": "#fechaHastaStatement",
-               "excel_export_button": "#botonDescargaExcel"
-            
+               "excel_export_button": "#botonDescargaExcel",
+                             
+               "without_movements": 'section.container-modal.warning',
+               "button_aceptar": '#errorModal[style*="display: block"] button#errorAccept',
+    
             },
             "step_4": {
-                "logout_button": "#rwb_header_user_box_salir"
+                "logout_button": '#btnDesconectar.c-botones-generico[role="button"]',
+                "confirm_logout_button": "#logout-disconect.btn-si"
             }
         }
 

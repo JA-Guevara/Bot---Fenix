@@ -8,29 +8,39 @@
     { "action": "click", "target": "step_1.login_button" },
     { "action": "fill", "target": "step_1.user2_input", "value": "$user" },
     { "action": "fill", "target": "step_1.password_input", "value": "$password" },
-    { "action": "click", "target": "step_1.login_button2" }
+    { "action": "click", "target": "step_1.login_button2" },
+    { "action": "wait_time", "value": 3000 }
   ],
+
   "pre_download": [
     { "action": "buscar", "target": "step_2.button_cuentas_ahorros" },
     { "action": "click", "target": "step_2.button_cuentas_ahorros" },
-        { "action": "wait_time", "value": 5000 }
-    ],
+    { "action": "wait_time", "value": 3000 }
+  ],
 
   "download": [
     { "action": "buscar", "target": "step_3.button_estracto" },
-    { "action": "wait_time", "value": 1000 },
+    { "action": "wait_time", "value": 2000 },
     { "action": "click", "target": "step_3.button_estracto" },
-    { "action": "buscar", "target": "step_3.button_desplegar_fecha" },
     { "action": "click", "target": "step_3.button_desplegar_fecha" },
+
     { "action": "click", "target": "step_3.select_inicio" },
-    { "action": "fill", "target": "step_3.select_inicio", "value": "$fecha_inicio" },
+    { "action": "fill", "target": "step_3.select_inicio", "value": "$fecha_inicio2" },
+
     { "action": "click", "target": "step_3.select_fin" },
-    { "action": "fill", "target": "step_3.select_fin", "value": "$fecha_fin" },
-    { "action": "keyboard_press", "value": "Enter" },
+    { "action": "fill", "target": "step_3.select_fin", "value": "$fecha_fin2" },
+    { "action": "keyboard_press", "value": "Tab" },
+
     { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
-    { "action": "click", "target": "step_2.button_cuentas_ahorros" }
-    ],
+    { "action": "wait_time", "value": 1500 },
+
+
+    { "action": "click", "target": "step_2.button_cuentas_ahorros" },
+    { "action": "wait_time", "value": 2000 }
+  ],
+
   "logout": [
-    { "action": "click", "target": "step_3.logout_button" }
+    { "action": "click", "target": "step_4.logout_button" },
+    { "action": "click", "target": "step_4.confirm_logout_button" }
   ]
 }

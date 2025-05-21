@@ -1,5 +1,6 @@
 from domain.login_interface import LoginStrategy
 from infrastructure.executors.action_executor import ActionExecutor
+
 import logging
 
 class SudamerisActions(LoginStrategy):
@@ -14,8 +15,7 @@ class SudamerisActions(LoginStrategy):
         self.logger.info("🌐 Login Banco Sudameris...")
         executor = ActionExecutor(page, self.selectors, self.credentials)
         await executor.run_flow(self.flow["login"])
-        
-        await browser.save_context_storage("sudameris")
+
         
     async def pre_download(self, page):
         executor = ActionExecutor(page, self.selectors, self.credentials)

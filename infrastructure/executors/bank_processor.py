@@ -31,6 +31,8 @@ class BankProcessor:
     async def ejecutar(self):
         self.logger.info(f"🚀 Iniciando procesamiento para banco: {self.nombre_banco.upper()}")
         browser = BrowserManager(headless=False)
+        browser.nombre_banco = self.nombre_banco
+
         page = await browser.get_new_page()
 
         try:
@@ -51,6 +53,8 @@ class BankProcessor:
                 cuentas=self.cuentas,
                 fecha_inicio=self.fecha_inicio.strftime("%Y-%m-%d"),
                 fecha_fin=self.fecha_fin.strftime("%Y-%m-%d"),
+                fecha_inicio2=self.fecha_inicio.strftime("%d/%m/%Y"),  # <- NUEVO
+                fecha_fin2=self.fecha_fin.strftime("%d/%m/%Y"),        # <- NUEVO
                 mes=self.mes,
                 banco=self.nombre_banco,
                 base_dir=self.base_dir,
@@ -74,7 +78,7 @@ class BankProcessor:
 
             self.logger.info("Iniciando login.")
 
-            if self.nombre_banco in ["sudameris", "basa"]:
+            if self.nombre_banco in ["sudameris"]:
                 await strategy.login(page, browser)
             else:
                 await strategy.login(page)

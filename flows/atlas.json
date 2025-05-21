@@ -11,6 +11,8 @@
 
   "pre_download": [
     { "action": "click", "target": "step_2.button_cuentas" },
+    { "action": "wait_time", "value": 3000 },
+    { "action": "click", "target": "step_2.button_cuentas" },
     { "action": "wait_time", "value": 3000 }
 
   ],

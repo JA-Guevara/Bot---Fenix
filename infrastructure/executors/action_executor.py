@@ -50,21 +50,40 @@ class ActionExecutor:
         except Exception as e:
             self.logger.error(f"❌ Error al verificar modal de contraseña: {e}")
             raise
-
+        
     async def esperar_y_guardar_descarga(self, selector: str, ruta_destino: str):
         if not ruta_destino or not ruta_destino.strip():
             raise ValueError("❌ La ruta de descarga está vacía o no fue resuelta correctamente.")
+
         os.makedirs(os.path.dirname(ruta_destino), exist_ok=True)
-        async with self.page.expect_download() as download_info:
-            await self.page.click(selector)
-        download = await download_info.value
+
+        # Selectores del modal de error
+        selector_modal = self.selectors["step_3"].get("button_aceptar")
+        selector_boton = self.selectors["step_3"].get("button_aceptar")
         try:
+            # ⏳ Intentar la descarga
+            async with self.page.expect_download(timeout=15000) as download_info:
+                await self.page.click(selector)
+                self.logger.info(f"🖱️ Click en botón de descarga: {selector}")
+
+            download = await download_info.value
             await download.save_as(ruta_destino)
             self.logger.info(f"✅ Archivo guardado como: {ruta_destino}")
-        except Exception as e:
-            self.logger.error(f"❌ Error al guardar archivo: {e}")
-            raise
-        
+            self.contexto["descarga_exitosa"] = True
+
+        except Exception as descarga_error:
+            self.logger.warning("⚠️ No se detectó ninguna descarga. Verificando si apareció el modal de error...")
+
+            try:
+                await self.page.wait_for_selector(selector_boton, state="visible", timeout=3000)
+                self.logger.warning(f"⚠️ Modal detectado. Haciendo click en botón aceptar...")
+                await self.page.click(selector_boton)
+                self.contexto["sin_descarga"] = True
+                return
+            except Exception:
+                self.logger.error("❌ No se detectó el modal de error. Posible fallo inesperado.")
+                raise descarga_error
+
     async def descargar_reportes(self, pasos_descarga: list, banco: str):
         banco = banco.lower().strip()
 
@@ -90,8 +109,9 @@ class ActionExecutor:
             self.logger.warning(f"⚠️ Banco '{banco}' no tiene lógica personalizada. Ejecutando método genérico.")
             await self.descargar_reportes_generico(pasos_descarga)
     
+
     async def descargar_reportes_gnb(self, pasos_descarga: list):
-        list_selector = self.selectors["step_2"].get("list_selector")
+        list_selector = self.selectors["step_2"].get("list_selector")  # este debería ser el selector del <em>
         if not list_selector:
             self.logger.error("❌ Falta 'list_selector' en los selectores del paso 2.")
             return
@@ -104,22 +124,19 @@ class ActionExecutor:
         processed_cuentas = set()
 
         while True:
-            contenedores = await self.page.query_selector_all(list_selector)
-            if not contenedores:
-                self.logger.warning("⚠️ No se encontraron contenedores de cuentas en el DOM.")
+            elementos_em = await self.page.query_selector_all(list_selector)
+            if not elementos_em:
+                self.logger.warning("⚠️ No se encontraron cuentas visibles en el DOM.")
                 break
 
             avanzar = False
 
-            for contenedor in contenedores:
+            for elemento in elementos_em:
                 try:
-                    texto_contenedor = (await contenedor.inner_text()).replace("\xa0", " ").upper()
-                    posibles = re.findall(r"\d{6,}", texto_contenedor)
-                    if not posibles:
-                        continue
-                    nro_cuenta = int(posibles[0])
+                    nro_texto = (await elemento.inner_text()).strip()
+                    nro_cuenta = int(re.sub(r"\D", "", nro_texto))
                 except Exception as e:
-                    self.logger.debug(f"❌ Error extrayendo cuenta: {e}")
+                    self.logger.debug(f"❌ Error extrayendo número de cuenta: {e}")
                     continue
 
                 if nro_cuenta in processed_cuentas:
@@ -134,20 +151,23 @@ class ActionExecutor:
                 clave = generar_clave_cuenta(cuenta)
                 ruta = self.contexto.get("rutas_por_cuenta", {}).get(clave)
                 if not ruta:
+                    self.logger.warning(f"⚠️ Ruta no encontrada para clave: {clave}")
                     processed_cuentas.add(nro_cuenta)
                     continue
 
                 self.contexto["ruta_descarga"] = ruta[0] if isinstance(ruta, tuple) else ruta
 
                 try:
-                    await contenedor.click()
+                    # 🔁 Subimos al padre TD (clickable), ya que el <em> no tiene click.
+                    contenedor_click = await elemento.evaluate_handle("el => el.closest('td')")
+                    await contenedor_click.click()
+                    await self.run_flow(pasos_descarga)
                 except Exception as e:
-                    continue
-
-                await self.run_flow(pasos_descarga)
-                processed_cuentas.add(nro_cuenta)
-                avanzar = True
-                break  # para recargar el DOM después
+                    self.logger.error(f"❌ Error al procesar cuenta {nro_cuenta}: {e}")
+                finally:
+                    processed_cuentas.add(nro_cuenta)
+                    avanzar = True
+                    break  # vuelve al while para actualizar elementos del DOM después del flujo
 
             if not avanzar:
                 break
@@ -347,8 +367,7 @@ class ActionExecutor:
 
             break
 
-                
-   
+
     async def seleccionar_opcion_dropdown(self, target: str, value: str):
         try:
             paso, campo = target.split(".")
@@ -369,9 +388,6 @@ class ActionExecutor:
 
         except Exception as e:
             self.logger.error(f"❌ Error al seleccionar opción en dropdown para '{target}': {e}")
-
-
-
 
     async def execute_step(self, step):
         action = step.get("action")
@@ -436,6 +452,7 @@ class ActionExecutor:
             elif action == "wait_for":
                 self.logger.info(f"⏳ Esperando selector {selector}")
                 await self.page.wait_for_selector(selector)
+                
             elif action == "buscar":
                 self.logger.info(f"🔍 Buscando selector {selector} con timeout extendido")
                 try:
@@ -469,17 +486,28 @@ class ActionExecutor:
                     raise ValueError("❌ 'ruta_descarga' no está definido o es vacío.")
                 self.logger.info(f"⬇️ Esperando descarga en: {ruta}")
                 await self.esperar_y_guardar_descarga(selector, ruta)
+            
+            elif action == "verificar_y_ejecutar":
+                mensaje_selector = step.get("target")
+                acciones = step.get("acciones", [])
+
+                try:
+                    await self.page.wait_for_selector(mensaje_selector, timeout=5000)
+                    self.logger.info(f"🔔 Modal detectado: {mensaje_selector}")
+
+                    for substep in acciones:
+                        await self.execute_step(substep)  # ✅ Reutiliza tu lógica central
+                    self.logger.info("✅ Acciones ejecutadas tras detectar el modal")
+                    self.contexto["descarga_finalizada"] = True
+                except Exception:
+                    self.logger.info("✅ No se detectó modal, flujo continúa normalmente")
+
+                
             elif action == "seleccionar_opcion_dropdown":
                 await self.seleccionar_opcion_dropdown(step.get("target"), value)
-                
-            elif action == "seleccionar_fecha":
-                target = step.get("target")
-                value = self._parse_value(step.get("value"))
-                await self.seleccionar_fecha(target, value)
-
-
             else:
                 self.logger.warning(f"⚠️ Acción desconocida: {action}")
+            
 
         except Exception as e:
             self.logger.error(f"❌ Error al ejecutar acción '{action}': {e}")
@@ -494,7 +522,7 @@ class ActionExecutor:
                 raise ValueError(f"⚠️ Variable '{variable_name}' no encontrada en credentials ni contexto.")
             return str(resolved)
         return value
-
+    
 
     async def run_flow(self, flow: list):
         for step in flow:

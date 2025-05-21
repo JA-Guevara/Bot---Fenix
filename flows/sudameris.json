@@ -5,7 +5,7 @@
       { "action": "fill", "target": "step_1.user_input", "value": "$user" },
       { "action": "fill", "target": "step_1.password_input", "value": "$password" },
       { "action": "click", "target": "step_1.login_button" },
-      { "action": "wait_time", "value": 1000000 }
+      { "action": "wait_time", "value": 10000 }
     ],
 
     "pre_download": [
