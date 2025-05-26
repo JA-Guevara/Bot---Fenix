@@ -106,10 +106,19 @@ def load_selectors():
                 "login_button": 'input[type="submit"][value="INGRESAR"]'
             },
             "step_2": {
+                "list_selector": "div.row.product-list",
+                "moneda_selector": "div.currency-code > span",
+                "tipo_selector": "div.product-details > div:nth-child(1)",
+                "cuenta_selector": "div.font-weight-bold > span",
+                "button_cuentas": "div.menu-home[onclick*='/sudamerisweb/home']"
             },
             "step_3": {
+                "select_mes" : "select#periodo",
+                "select_formato":  "select#fileType",
+                "excel_export_button": "span#downloadFile",
             },
             "step_4": {
+                "logout_button": 'div.logout'
             }
         },
         

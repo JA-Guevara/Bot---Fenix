@@ -17,7 +17,7 @@
       { "action": "wait_time", "value": 5000 },
       { "action": "buscar", "target": "step_2.button_cuentas" },
       { "action": "click", "target": "step_2.button_cuentas" },
-      { "action": "wait_time", "value": 10000 }
+      { "action": "wait_time", "value": 5000 }
     ],
 
   "download": [

@@ -53,9 +53,10 @@ class BankProcessor:
                 cuentas=self.cuentas,
                 fecha_inicio=self.fecha_inicio.strftime("%Y-%m-%d"),
                 fecha_fin=self.fecha_fin.strftime("%Y-%m-%d"),
-                fecha_inicio2=self.fecha_inicio.strftime("%d/%m/%Y"),  # <- NUEVO
-                fecha_fin2=self.fecha_fin.strftime("%d/%m/%Y"),        # <- NUEVO
+                fecha_inicio2=self.fecha_inicio.strftime("%d/%m/%Y"),
+                fecha_fin2=self.fecha_fin.strftime("%d/%m/%Y"),        
                 mes=self.mes,
+                mes2 = self.fecha_inicio.strftime("%Y%m"),
                 banco=self.nombre_banco,
                 base_dir=self.base_dir,
                 rutas_por_cuenta=rutas_por_cuenta,

@@ -10,6 +10,7 @@ class ContextoEjecucion:
     fecha_inicio2: str
     fecha_fin2: str
     mes: str
+    mes2: str
     banco: str
     base_dir: str
     rutas_por_cuenta: Dict[str, str]
@@ -24,9 +25,11 @@ class ContextoEjecucion:
             "fecha_inicio2": self.fecha_inicio2,
             "fecha_fin2": self.fecha_fin2,
             "mes": self.mes,
+            "mes2": self.mes2,
             "banco": self.banco,
             "base_dir": self.base_dir,
             "rutas_por_cuenta": self.rutas_por_cuenta,
             "dia_inicio": self.dia_inicio,
-            "dia_fin": self.dia_fin
+            "dia_fin": self.dia_fin,
+              
         }

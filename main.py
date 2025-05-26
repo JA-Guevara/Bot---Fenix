@@ -7,7 +7,7 @@ from task.task_manager import TaskManager
 
 logger = logging.getLogger(__name__)
 
-bancos = ["continental","basa","atlas","gnb"]
+bancos = ["continental"]
 
 async def main():
     logger.info("Iniciando el proceso principal.")

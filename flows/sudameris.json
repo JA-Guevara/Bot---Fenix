@@ -5,19 +5,24 @@
       { "action": "fill", "target": "step_1.user_input", "value": "$user" },
       { "action": "fill", "target": "step_1.password_input", "value": "$password" },
       { "action": "click", "target": "step_1.login_button" },
-      { "action": "wait_time", "value": 10000 }
+      { "action": "wait_time", "value": 5000 }
     ],
 
     "pre_download": [
 
-      { "action": "click", "target": "step_2.button_informes" }
     ],
 
     "download": [
+      { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_mes", "value": "$mes2" },
+                  { "action": "wait_time", "value": 1000 },
+      { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_formato", "value": "EXCEL" },
+            { "action": "wait_time", "value": 1000 },
+      { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
+      { "action": "click", "target": "step_2.button_cuentas" },
+      { "action": "wait_time", "value": 2000 }
     ],
 
     "logout": [
-      { "action": "click", "target": "step_4.menu_button" },
       { "action": "click", "target": "step_4.logout_button" }
     ]
   }
