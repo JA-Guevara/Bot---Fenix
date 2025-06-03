@@ -34,7 +34,7 @@ def generar_ruta_archivo(
     nro_cuenta = str(nro_cuenta).strip().upper()
     tipo_moneda = str(tipo_moneda).strip().upper()
 
-    nombre_archivo = f"{tipo_archivo}_{tipo_cuenta}_{nro_cuenta}_{tipo_moneda}.xlsx"
-    ruta_completa = os.path.join(ruta_banco, nombre_archivo)
+    nombre_archivo_sin_ext = f"{tipo_archivo}_{tipo_cuenta}_{nro_cuenta}_{tipo_moneda}"
+    ruta_completa = os.path.join(ruta_banco, nombre_archivo_sin_ext)
 
     return ruta_completa

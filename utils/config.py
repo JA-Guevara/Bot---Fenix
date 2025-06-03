@@ -2,17 +2,12 @@ import os
 from dotenv import load_dotenv
 import json
 
-
-# Cargar variables de entorno desde el archivo .env
 load_dotenv()
-
-# Tiempo de espera general
 
 PERIODO_DESCARGA = os.getenv("PERIODO_DESCARGA", "mensual")  # por defecto mensual
 QUINCENA = os.getenv("QUINCENA") 
 RUTA_EXCEL = os.getenv("RUTA_EXCEL")
 BASE_DIR = os.getenv("BASE_DIR")
-
 
 def get_credentials(bank_name: str):
     upper = bank_name.upper()
@@ -29,12 +24,9 @@ def get_credentials(bank_name: str):
 
     return credentials
 
-
-
 def load_flow(bank_name):
     with open(f"flows/{bank_name}.json", "r", encoding="utf-8") as file:
         return json.load(file)
-
 
 def load_selectors():
 
@@ -130,12 +122,13 @@ def load_selectors():
                 "login_button": "#vprocesar",
                 "password_virtual_selector": "#teclado_borrar",
                 "access_button": "#rwb_login_Siguiente"
-
             },
             "step_2": {
             },
             "step_3": {
-                "logout_button": "#rwb_header_user_box_salir"
+            },
+            "step_4": {
+                "logout_button": "div#rwb_header_user_box_salir"
             }
         },
         

@@ -14,9 +14,9 @@
 
     "download": [
       { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_mes", "value": "$mes2" },
-                  { "action": "wait_time", "value": 1000 },
+      { "action": "wait_time", "value": 1000 },
       { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_formato", "value": "EXCEL" },
-            { "action": "wait_time", "value": 1000 },
+      { "action": "wait_time", "value": 1000 },
       { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"},
       { "action": "click", "target": "step_2.button_cuentas" },
       { "action": "wait_time", "value": 2000 }

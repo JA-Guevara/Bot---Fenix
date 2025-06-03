@@ -11,10 +11,32 @@
 
     { "action": "wait_for", "target": "step_1.password_virtual_selector" },
     { "action": "type_virtual_pin" },
-    { "action": "click", "target": "step_1.access_button" }
+    { "action": "click", "target": "step_1.access_button" },
+    { "action": "wait_time", "value": 5000 }
+  ],
+
+   "pre_download_cc": [
+    { "action": "click", "target": "step_2.menu_productos" },
+    { "action": "click", "target": "step_2.button_cuenta_corriente" },
+    { "action": "wait_time", "value": 2000 }
+  ],
+
+  "pre_download_ca": [
+    { "action": "click", "target": "step_2.menu_productos" },
+    { "action": "click", "target": "step_2.button_caja_ahorro" },
+    { "action": "wait_time", "value": 2000 }
+  ],
+
+  "download": [
+    { "action": "seleccionar_opcion_dropdown", "target": "step_3.select_mes", "value": "$mes3" },
+    { "action": "click", "target": "step_3.button_descagar" },
+    { "action": "buscar", "target": "step_3.excel_export_button" },
+    { "action": "wait_time", "value": 1000 },
+    { "action": "descargar_y_guardar","target": "step_3.excel_export_button","value": "$ruta_descarga"}
+
   ],
 
   "logout": [
-    { "action": "click", "target": "step_3.logout_button" }
+    { "action": "click", "target": "step_4.logout_button" }
   ]
 }

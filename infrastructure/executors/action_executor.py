@@ -50,77 +50,135 @@ class ActionExecutor:
         except Exception as e:
             self.logger.error(f"❌ Error al verificar modal de contraseña: {e}")
             raise
-        
+ 
+                
     async def esperar_y_guardar_descarga(self, selector: str, ruta_destino: str):
         if not ruta_destino or not ruta_destino.strip():
             raise ValueError("❌ La ruta de descarga está vacía o no fue resuelta correctamente.")
 
         os.makedirs(os.path.dirname(ruta_destino), exist_ok=True)
 
-        # Selectores del modal de error
         selector_modal = self.selectors["step_3"].get("button_aceptar")
-        selector_boton = self.selectors["step_3"].get("button_aceptar")
+
         try:
-            # ⏳ Intentar la descarga
+            # Esperar que el botón esté visible
+            await self.page.wait_for_selector(selector, state="visible", timeout=10000)
+            self.logger.info(f"🔍 Selector localizado: {selector}")
+
+            # Iniciar escucha de descarga
             async with self.page.expect_download(timeout=15000) as download_info:
                 await self.page.click(selector)
                 self.logger.info(f"🖱️ Click en botón de descarga: {selector}")
 
             download = await download_info.value
-            await download.save_as(ruta_destino)
-            self.logger.info(f"✅ Archivo guardado como: {ruta_destino}")
+
+            # Obtener extensión real del archivo descargado
+            suggested_filename = download.suggested_filename
+            extension_real = os.path.splitext(suggested_filename)[1].lower()
+
+            # Validar que sea .xls o .xlsx
+            if extension_real not in [".xls", ".xlsx"]:
+                self.logger.error(f"❌ El archivo descargado tiene una extensión no válida: {extension_real}")
+                raise ValueError(f"❌ El archivo descargado no es Excel: {suggested_filename}")
+
+            # Guardar con la extensión correcta
+            ruta_base, _ = os.path.splitext(ruta_destino)
+            ruta_destino_final = f"{ruta_base}{extension_real}"
+
+            await download.save_as(ruta_destino_final)
+            self.logger.info(f"✅ Archivo guardado como: {ruta_destino_final}")
             self.contexto["descarga_exitosa"] = True
 
         except Exception as descarga_error:
             self.logger.warning("⚠️ No se detectó ninguna descarga. Verificando si apareció el modal de error...")
 
             try:
-                await self.page.wait_for_selector(selector_boton, state="visible", timeout=3000)
-                self.logger.warning(f"⚠️ Modal detectado. Haciendo click en botón aceptar...")
-                await self.page.click(selector_boton)
+                await self.page.wait_for_selector(selector_modal, state="visible", timeout=3000)
+                self.logger.warning("⚠️ Modal detectado. Haciendo click en botón aceptar...")
+                await self.page.click(selector_modal)
                 self.contexto["sin_descarga"] = True
                 return
             except Exception:
                 self.logger.error("❌ No se detectó el modal de error. Posible fallo inesperado.")
                 raise descarga_error
 
-    
+
+
     async def seleccionar_opcion_dropdown(self, target: str, value: str):
         try:
             paso, campo = target.split(".")
             selector = self.selectors.get(paso, {}).get(campo)
+
             if not selector:
                 self.logger.error(f"❌ Selector no encontrado para {target}")
                 return
 
-            # Espera hasta que el selector esté disponible
-            await self.page.wait_for_selector(selector, timeout=10000)
+            # Esperar a que esté en el DOM y visible
+            try:
+                await self.page.wait_for_selector(selector, state="visible", timeout=10000)
+            except:
+                self.logger.warning(f"⚠️ El selector {selector} no se mostró en 10s, se intenta igual...")
 
             elemento = await self.page.query_selector(selector)
-            if elemento is None:
-                self.logger.error(f"❌ No se encontró el elemento en la página con selector: {selector}")
+            if not elemento:
+                self.logger.error(f"❌ Elemento no encontrado para selector: {selector}")
                 return
 
             tag_name = (await (await elemento.get_property("tagName")).json_value()).lower()
 
+            # CASO 1: <select> nativo
             if tag_name == "select":
-                # ✅ Caso correcto para <select>: usar select_option()
-                self.logger.info(f"📂 Detectado <select>, seleccionando value='{value}' en {selector}")
                 await self.page.select_option(selector, value=value)
-                self.logger.info(f"✅ Valor seleccionado correctamente: {value}")
-            else:
-                # ✅ Caso para dropdown personalizados (otros bancos)
-                self.logger.info(f"📅 Abriendo dropdown personalizado con selector: {selector}")
-                await self.page.click(selector)
-                opcion_selector = f"text={value}"
-                await self.page.wait_for_selector(opcion_selector, timeout=12000)
-                await self.page.click(opcion_selector)
-                self.logger.info(f"✅ Opción seleccionada: {value}")
+                self.logger.info(f"✅ Valor seleccionado en <select>: {value}")
+                return
+
+            # CASO 2: Click en dropdown visual
+            try:
+                await self.page.click(selector, force=True)
+                self.logger.info(f"📂 Dropdown desplegado con {selector}")
+            except Exception as e:
+                self.logger.warning(f"⚠️ No se pudo hacer click en dropdown: {e}")
+
+            # Estrategias posibles para localizar opción
+            posibles_opciones = [
+                f"{selector} >> text={value}",
+                f"text=\"{value}\"",
+                f"li >> text={value}",
+                f"div[role='option']:has-text('{value}')",
+                f"div.ui-menu-item-wrapper:has-text('{value}')",
+                f"button.dropdown-item:has-text('{value}')",
+            ]
+
+            for opcion_selector in posibles_opciones:
+                try:
+                    opcion = self.page.locator(opcion_selector).first
+                    await opcion.wait_for(state="visible", timeout=3000)
+                    await opcion.click()
+                    self.logger.info(f"✅ Opción seleccionada vía: {opcion_selector}")
+                    return
+                except Exception as e:
+                    self.logger.debug(f"🔁 Falló intento con {opcion_selector}: {e}")
+                    continue
+
+            # Intento final: buscar por texto directamente en pantalla (menos preciso)
+            try:
+                elementos = await self.page.locator(f"text={value}").element_handles()
+                for el in elementos:
+                    try:
+                        await el.click()
+                        self.logger.info(f"✅ Click final en texto directo: {value}")
+                        return
+                    except:
+                        continue
+            except:
+                pass
+
+            self.logger.error(f"❌ No se logró seleccionar '{value}' con ninguna estrategia para {target}")
 
         except Exception as e:
-            self.logger.error(f"❌ Error al seleccionar opción en dropdown para '{target}': {e}")
+            self.logger.error(f"❌ Error inesperado al seleccionar '{value}' en '{target}': {e}")
 
-            
+             
     async def execute_step(self, step):
         action = step.get("action")
         try:
@@ -237,6 +295,7 @@ class ActionExecutor:
                 
             elif action == "seleccionar_opcion_dropdown":
                 await self.seleccionar_opcion_dropdown(step.get("target"), value)
+
             else:
                 self.logger.warning(f"⚠️ Acción desconocida: {action}")
             
